@@ -1,0 +1,8 @@
+name: NexusBans
+version: '${version}'
+
+main: cc.synkdev.nexusbans.NexusBans
+api-version: '26.3'
+load: POSTWORLD
+
+authors: [ Synk_ ]
