@@ -20,6 +20,9 @@ public class ConfigManager {
     private static YamlConfiguration config;
     @Getter private static ConfigurationSection messages;
 
+    @Getter private static boolean debug;
+    @Getter private static boolean alertAttemp;
+
     private static void updateConfig() throws IOException {
         if (!core.getDataFolder().exists()) core.getDataFolder().mkdirs();
         if (!configFile.exists()) {
@@ -56,5 +59,8 @@ public class ConfigManager {
 
         config = YamlConfiguration.loadConfiguration(configFile);
         messages = config.getConfigurationSection("messages");
+
+        debug = config.contains("debug") && config.getBoolean("debug");
+        alertAttemp = config.getBoolean("alert-on-attemp");
     }
 }

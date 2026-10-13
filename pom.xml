@@ -125,5 +125,11 @@
             <artifactId>adventure-text-minimessage</artifactId>
             <version>5.2.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>4.8.184</version>
+        </dependency>
     </dependencies>
 </project>

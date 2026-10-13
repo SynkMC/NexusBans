@@ -1,0 +1,15 @@
+name: NexusBans
+version: '${version}'
+
+main: cc.synkdev.nexusbans.NexusBans
+api-version: '26.3'
+load: POSTWORLD
+
+authors: [ Synk_ ]
+permissions:
+  nexusbans.mute.exempt:
+    default: op
+    description: Bypass mute punishments
+  nexusbans.alert:
+    default: op
+    description: Receive alerts when a player tries to bypass their punishments
