@@ -14,6 +14,7 @@ public class Punishment {
     private UUID executor;
     private String reason;
     private long expiry;
+    private long timestamp;
 
     public Punishment(PunishmentType type, String target, UUID executor, String reason, long expiry) {
         this.uuid = UUID.randomUUID();
@@ -22,6 +23,7 @@ public class Punishment {
         this.executor = executor;
         this.reason = reason;
         this.expiry = expiry;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public boolean isActive() {

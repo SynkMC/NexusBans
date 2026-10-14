@@ -41,7 +41,7 @@ public abstract class PunishmentType implements Listener {
         if (targetType() == TargetType.IP) {
             return Utils.isPunished(s, this);
         } else {
-            return Utils.isPunished(s, this) && (Utils.isOnline(UUID.fromString(s)) && Bukkit.getPlayer(s).hasPermission("nexusstaff.punishment.bypass"));
+            return Utils.isPunished(s, this) && (Utils.isOnline(UUID.fromString(s)) && !Bukkit.getPlayer(UUID.fromString(s)).hasPermission("nexusstaff.punishment.bypass"));
         }
     }
 
@@ -57,10 +57,7 @@ public abstract class PunishmentType implements Listener {
     }
 
     public void executePunishment(Punishment punishment) {
-        if (doPunish(punishment.getTarget())) {
-            Utils.debug("Doing punish");
-            execute(punishment).run();
-        }
+        if (doPunish(punishment.getTarget()) && execute(punishment) != null) execute(punishment).run();
     }
 
     public BasicCommand getCommandHandler() {
@@ -74,7 +71,7 @@ public abstract class PunishmentType implements Listener {
                 boolean console = !(commandSourceStack.getSender() instanceof Player);
                 String reason = null;
                 if (temp) {
-                    duration = Utils.parseTime(args[1]);
+                    duration = System.currentTimeMillis()+Utils.parseTime(args[1]);
                     if (args.length > 2) {
                         List<String> argsList = new ArrayList<>(Arrays.asList(args));
                         argsList.removeFirst();
@@ -83,14 +80,14 @@ public abstract class PunishmentType implements Listener {
                         reason = Strings.join(argsList, ' ');
                     }
                 } else {
-                    duration = -1L;
+                    duration = isInstant() ? System.currentTimeMillis()+1000L : -1L;
                     if (args.length > 1) {
                         List<String> argsList = new ArrayList<>(Arrays.asList(args));
                         argsList.removeFirst();
 
                         reason = Strings.join(argsList, ' ');
                     }
-                    Utils.debug("Correct args count");
+                    Utils.debug("Correct args count. Reason "+reason);
                 }
                 try {
                     Utils.punish(target, this, duration, reason, console ? null : commandSourceStack.getPlayerOrThrow().getUniqueId());
@@ -112,6 +109,6 @@ public abstract class PunishmentType implements Listener {
     }
 
     public boolean isPunished(Player p) {
-        return isPunished(p.getUniqueId().toString()) && !p.hasPermission("nexusbans."+getId()+".exempt");
+        return (isPunished(p.getUniqueId().toString()) || isPunished(p.getAddress().getHostName())) && !p.hasPermission("nexusbans."+getId()+".exempt");
     }
 }

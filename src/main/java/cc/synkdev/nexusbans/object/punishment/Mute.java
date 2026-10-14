@@ -10,6 +10,7 @@ import org.bukkit.event.Event;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class Mute extends PunishmentType {
     @Override
     public Class<? extends Event> eventClass() {
@@ -40,9 +41,7 @@ public class Mute extends PunishmentType {
 
     @Override
     public Runnable execute(Punishment p) {
-        return () -> {
-            //TODO
-        };
+        return null;
     }
 
     @Override

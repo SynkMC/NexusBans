@@ -42,7 +42,11 @@ public class Utils {
     }
 
     public static void debug(String message) {
-        if (ConfigManager.isDebug()) log(NexusBans.getInstance().getPrefix().append(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » "+message)));
+        if (ConfigManager.isDebug()) log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » "+message));
+    }
+
+    public static void debug(Component component) {
+        if (ConfigManager.isDebug()) log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » ").append(component));
     }
 
     public static boolean isPunished(String target, PunishmentType type) {
@@ -115,25 +119,22 @@ public class Utils {
 
     public static long parseTime(String time) {
         long totalMillis = 0;
-        String[] parts = time.split(" ");
-        for (String part : parts) {
-            if (part.endsWith("h")) {
-                totalMillis += Long.parseLong(part.replace("h", "")) * 60 * 60;
-            } else if (part.endsWith("m")) {
-                totalMillis += Long.parseLong(part.replace("m", "")) * 60;
-            } else if (part.endsWith("s")) {
-                totalMillis += Long.parseLong(part.replace("s", ""));
-            } else if (part.endsWith("d")) {
-                totalMillis += Long.parseLong(part.replace("d", "")) * 24 * 60 * 60;
-            } else if (part.endsWith("w")) {
-                totalMillis += Long.parseLong(part.replace("w", "")) * 7 * 24 * 60 * 60;
-            } else if (part.endsWith("mo")) {
-                totalMillis += Long.parseLong(part.replace("mo", "")) * 30 * 24 * 60 * 60;
-            } else if (part.endsWith("y")) {
-                totalMillis += Long.parseLong(part.replace("y", "")) * 365 * 24 * 60 * 60;
-
+            if (time.endsWith("h")) {
+                totalMillis += Long.parseLong(time.replace("h", "")) * 60 * 60;
+            } else if (time.endsWith("m")) {
+                totalMillis += Long.parseLong(time.replace("m", "")) * 60;
+            } else if (time.endsWith("s")) {
+                totalMillis += Long.parseLong(time.replace("s", ""));
+            } else if (time.endsWith("d")) {
+                totalMillis += Long.parseLong(time.replace("d", "")) * 24 * 60 * 60;
+            } else if (time.endsWith("w")) {
+                totalMillis += Long.parseLong(time.replace("w", "")) * 7 * 24 * 60 * 60;
+            } else if (time.endsWith("mo")) {
+                totalMillis += Long.parseLong(time.replace("mo", "")) * 30 * 24 * 60 * 60;
+            } else if (time.endsWith("y")) {
+                totalMillis += Long.parseLong(time.replace("y", "")) * 365 * 24 * 60 * 60;
             }
-        }
+
         return totalMillis;
     }
 
@@ -147,8 +148,9 @@ public class Utils {
         PunishmentManager.getPunishMap().put(target, profile);
 
         boolean temp = expiry != -1L;
-        Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> sendMessage(player, temp ? "temp-punishment-success" : "punishment-success", executor == null ? "Console" : getName(executor), type.getVerb(), Utils.getName(target), parseTime(getTimeRemaining(target, type))));
+        Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> sendMessage(player, temp ? "temp-punishment-success" : "punishment-success", executor == null ? "Console" : getName(executor), type.getVerb(), Utils.getName(target), type.isInstant() ? reason : parseTime(getTimeRemaining(target, type))));
         getOnlinePlayers(target).forEach(player -> sendMessage(player, temp ? "temp-punished-notify" : "punished-notify", type.getVerb(), parseTime(getTimeRemaining(target, type))));
+        type.executePunishment(punishment);
     }
 
     private static String getName(String target) {
