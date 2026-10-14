@@ -1,4 +1,5 @@
-alert-on-attemp: true #Alert player with the nexusbans.alert permission if, for example, a muted player tries to chat
+alert-on-attempt: true #Alert player with the nexusbans.alert permission if, for example, a muted player tries to chat
+ban-all-ips: true #When using ipban or ipmute on a player and not a specific IP, whether to ban all the IPs this player has used in the past or only their current one
 messages:
   prefix: "<dark_gray>[<gradient:#FFAA00:#940000>NexusBans</gradient><dark_gray>] » <reset>"
   temp-punish-usage: "<red>Usage: /%s1% [target] [duration] (reason)"
@@ -17,3 +18,7 @@ messages:
   alert-ban: "<dark_red>%s1% <red>tried to join the server while they were banned!"
   kicked: "<red>You were kicked from the server!"
   kicked-reason: "<red>You were kicked from the server for <dark_red>%s1%<red>!"
+  un-usage: "<red>Usage: /un%s1% <username/ip>"
+  not-punished: "<dark_red>%s1% <red>wasn't %s2%!"
+  unpunished: "<dark_red>%s1% <red>was un%s2%!"
+  unpunished-notify: "<green>You were un%s1%!"

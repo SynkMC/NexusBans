@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class ConfigManager {
+    private ConfigManager() {
+        /* This utility class should not be instantiated */
+    }
+
     private static final NexusBans core = NexusBans.getInstance();
     private static final File configFile = new File(core.getDataFolder(), "config.yml");
     @Getter private static final List<String> skip = new ArrayList<>();
@@ -21,7 +25,8 @@ public class ConfigManager {
     @Getter private static ConfigurationSection messages;
 
     @Getter private static boolean debug;
-    @Getter private static boolean alertAttemp;
+    @Getter private static boolean alertAttempt;
+    @Getter private static boolean banAllIps;
 
     private static void updateConfig() throws IOException {
         if (!core.getDataFolder().exists()) core.getDataFolder().mkdirs();
@@ -44,7 +49,9 @@ public class ConfigManager {
                 config.save(configFile);
             }
 
-            Files.delete(temp.toPath());
+            if (!temp.delete()) {
+                temp.deleteOnExit();
+            }
         }
         config = YamlConfiguration.loadConfiguration(configFile);
 
@@ -61,6 +68,7 @@ public class ConfigManager {
         messages = config.getConfigurationSection("messages");
 
         debug = config.contains("debug") && config.getBoolean("debug");
-        alertAttemp = config.getBoolean("alert-on-attemp");
+        alertAttempt = config.getBoolean("alert-on-attempt");
+        banAllIps = config.getBoolean("ban-all-ips");
     }
 }

@@ -1,16 +1,13 @@
 package cc.synkdev.nexusbans;
 
+import cc.synkdev.nexusbans.listener.JoinIpListener;
 import cc.synkdev.nexusbans.manager.ConfigManager;
 import cc.synkdev.nexusbans.manager.PunishmentManager;
 import cc.synkdev.nexusbans.manager.Utils;
-import cc.synkdev.nexusbans.object.Punishment;
-import cc.synkdev.nexusbans.object.PunishmentProfile;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Map;
-import java.util.UUID;
 
 public final class NexusBans extends JavaPlugin {
 
@@ -21,6 +18,8 @@ public final class NexusBans extends JavaPlugin {
         instance = this;
         ConfigManager.load();
         PunishmentManager.registerTypes(this);
+
+        Bukkit.getPluginManager().registerEvents(new JoinIpListener(), this);
     }
 
     public Component getPrefix() {

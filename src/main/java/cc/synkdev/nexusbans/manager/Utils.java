@@ -171,11 +171,25 @@ public class Utils {
     public static List<Player> getOnlinePlayers(String target) {
         if (isIp(target)) {
             Bukkit.getOnlinePlayers().forEach(player -> log(player.getAddress().getHostName()+", "+player.getAddress().toString()));
-            return (List<Player>) Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target)).toList();
+            return Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target))
+                    .map(OfflinePlayer::getPlayer).toList();
         } else {
             OfflinePlayer oP = Bukkit.getOfflinePlayer(UUID.fromString(target));
             if (oP.isOnline()) return Collections.singletonList(oP.getPlayer());
             else return Collections.emptyList();
         }
+    }
+    public static void updatePunishment(Punishment p) {
+        PunishmentProfile profile = PunishmentManager.getPunishMap().getOrDefault(p.getTarget(), new PunishmentProfile(p.getTarget()));
+        profile.getPunishmentMap().put(p.getUuid(), p);
+
+        PunishmentManager.getPunishMap().put(p.getTarget(), profile);
+    }
+
+    public static void unpunish(String target, PunishmentType pt) {
+        Punishment punishment = getActivePunishment(target, pt);
+        if (punishment == null) return;
+        punishment.setExpiry(System.currentTimeMillis());
+        updatePunishment(punishment);
     }
 }

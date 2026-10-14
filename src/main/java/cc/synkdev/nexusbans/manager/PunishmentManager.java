@@ -31,7 +31,10 @@ public class PunishmentManager {
             for (Class<?> clazz : list) {
                 PunishmentType type = (PunishmentType) clazz.getDeclaredConstructor().newInstance();
                 type.registerListener();
-                core.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> event.registrar().register(type.getId(), type.getCommandHandler()));
+                core.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+                    event.registrar().register(type.getId(), type.getCommandHandler());
+                    if (!type.isInstant()) event.registrar().register("un"+type.getId(), type.getUnCommandHandler());
+                });
                 PunishmentManager.getPTypes().add(type);
             }
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
@@ -42,7 +45,7 @@ public class PunishmentManager {
         alert(p, type.getId());
     }
     public static void alert(Player p, String type) {
-        if (!ConfigManager.isAlertAttemp()) return;
+        if (!ConfigManager.isAlertAttempt()) return;
 
         Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> Utils.sendMessage(player, "alert-"+type, p.getName()));
     }
