@@ -4,7 +4,10 @@ import cc.synkdev.nexusbans.NexusBans;
 import cc.synkdev.nexusbans.object.Punishment;
 import cc.synkdev.nexusbans.object.PunishmentProfile;
 import cc.synkdev.nexusbans.object.PunishmentType;
-import java.util.Collections;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -12,28 +15,37 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 
 public class Utils {
     private Utils() {
         /* This utility class should not be instantiated */
     }
 
-    public static Component translate(String key, String... placeholder) {
+    public static Component translate(String key, String... placeholders) {
         String msg = ConfigManager.getMessages().getString(key);
+        return getComponent(msg, placeholders);
+    }
+    public static Component translateLiteral(String msg, String... placeholders) {
+        return getComponent(msg, placeholders);
+    }
+    public static List<Component> translateLiteralList(List<String> list, String... placeholders) {
+        return list.stream().map(s -> translateLiteral(s, placeholders)).toList();
+    }
+
+    @NonNull
+    private static Component getComponent(String msg, String[] placeholders) {
         if (msg == null) {
             return MiniMessage.miniMessage().deserialize("<red>Invalid translation!");
         }
-        if (placeholder.length > 0) {
-            for (int i = 0; i < placeholder.length; i++) {
-                msg = msg.replace("%s"+(i+1)+"%", placeholder[i]);
+        if (placeholders.length > 0) {
+            for (int i = 0; i < placeholders.length; i++) {
+                msg = msg.replace("%s"+(i+1)+"%", placeholders[i]);
             }
         }
         return MiniMessage.miniMessage().deserialize(msg);
     }
+
     public static void log(Component message) {
         Bukkit.getConsoleSender().sendMessage(NexusBans.getInstance().getPrefix().append(message));
     }
@@ -61,6 +73,7 @@ public class Utils {
 
     public static String parseTime(long time) {
         StringBuilder sb = new StringBuilder();
+        time = time+1;
         if (time >= 365 * 24 * 60 * 60) {
             sb.append((int) time / (365 * 24 * 60 * 60)).append("y ");
             time %= 365 * 24 * 60 * 60;
@@ -91,6 +104,12 @@ public class Utils {
         return sb.toString().trim();
     }
     public static Punishment getActivePunishment(String string, PunishmentType type) {
+        PunishmentManager.getPunishMap().forEach((s, punishmentProfile) -> {
+            debug("Profile target:" +punishmentProfile.getTarget());
+            punishmentProfile.getPunishmentMap().forEach((uuid, punishment) -> {
+                debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), punishment.getExecutor().toString(), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+""));
+            });
+        });
         Map.Entry<UUID, Punishment> entry = PunishmentManager.getPunishMap().getOrDefault(string, new PunishmentProfile(string)).getPunishmentMap().entrySet().stream().filter(mapEntry -> mapEntry.getValue().isActive() && mapEntry.getValue().getType().equals(type)).findFirst().orElse(null);
         if (entry == null) {
             return null;
@@ -135,7 +154,7 @@ public class Utils {
                 totalMillis += Long.parseLong(time.replace("y", "")) * 365 * 24 * 60 * 60;
             }
 
-        return totalMillis;
+        return totalMillis*1000;
     }
 
     public static PunishmentType getPunishmentType(String id) {
@@ -188,8 +207,31 @@ public class Utils {
 
     public static void unpunish(String target, PunishmentType pt) {
         Punishment punishment = getActivePunishment(target, pt);
+        debug("Target: "+target + " Pt: "+pt.getId());
         if (punishment == null) return;
         punishment.setExpiry(System.currentTimeMillis());
         updatePunishment(punishment);
+
+        Utils.getOnlinePlayers(target).forEach(player -> {
+            PunishmentManager.alert("unpunished", player.getName(), pt.getVerb());
+            Utils.sendMessage(player, "unpunished-notify", pt.getVerb()
+            );
+        });
+    }
+
+    public static Component minify(String s) {
+        return MiniMessage.miniMessage().deserialize(s);
+    }
+
+    public static @NotNull List<Component> componentifyList(List<String> lore) {
+        return lore.stream().map(Utils::minify).toList();
+    }
+
+    public static String formatTimestamp(long timestamp) {
+        Date date = new Date(timestamp);
+
+        SimpleDateFormat sdf = new SimpleDateFormat(ConfigManager.getDateFormat());
+        sdf.setTimeZone(TimeZone.getDefault());
+        return sdf.format(date);
     }
 }

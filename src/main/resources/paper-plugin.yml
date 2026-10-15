@@ -10,6 +10,21 @@ permissions:
   nexusbans.mute.exempt:
     default: op
     description: Bypass mute punishments
+  nexusbans.tempmute.exempt:
+    default: op
+    description: Bypass tempmute punishments
+  nexusbans.kick.exempt:
+    default: op
+    description: Bypass kick punishments
+  nexusbans.ban.exempt:
+    default: op
+    description: Bypass ban punishments
+  nexusbans.ipban.exempt:
+    default: op
+    description: Bypass ipban punishments
   nexusbans.alert:
     default: op
     description: Receive alerts when a player tries to bypass their punishments
+  nexusbans.command.reload:
+    default: op
+    description: Reload the plugin configuration

@@ -1,5 +1,6 @@
 package cc.synkdev.nexusbans.object;
 
+import cc.synkdev.nexusbans.manager.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,5 +29,8 @@ public class Punishment {
 
     public boolean isActive() {
         return System.currentTimeMillis() < getExpiry() || getExpiry() == -1L;
+    }
+    public String getName() {
+        return type.targetType() == TargetType.IP ? target : Utils.getName(UUID.fromString(getTarget()));
     }
 }

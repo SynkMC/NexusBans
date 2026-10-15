@@ -7,6 +7,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -34,6 +35,7 @@ public class PunishmentManager {
                 core.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
                     event.registrar().register(type.getId(), type.getCommandHandler());
                     if (!type.isInstant()) event.registrar().register("un"+type.getId(), type.getUnCommandHandler());
+                    
                 });
                 PunishmentManager.getPTypes().add(type);
             }
@@ -48,5 +50,8 @@ public class PunishmentManager {
         if (!ConfigManager.isAlertAttempt()) return;
 
         Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> Utils.sendMessage(player, "alert-"+type, p.getName()));
+    }
+    public static void alert(String key, String... args) {
+        Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> Utils.sendMessage(player, key, args));
     }
 }

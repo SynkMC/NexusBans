@@ -6,6 +6,7 @@ import cc.synkdev.nexusbans.manager.IpManager;
 import cc.synkdev.nexusbans.manager.Utils;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.BasicCommand;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.apache.logging.log4j.util.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -14,6 +15,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,93 +62,110 @@ public abstract class PunishmentType implements Listener {
     }
 
     public BasicCommand getCommandHandler() {
-        return (commandSourceStack, args) -> {
-            Utils.debug("Args: "+String.join(", ", args));
-            boolean temp = getId().startsWith("temp");
-            if ((temp && args.length >= 2) || (!temp && args.length >= 1)) {
-                Utils.debug("Correct args count");
-                List<String> target = new ArrayList<>();
-                if (targetType() == TargetType.IP) {
-                    if (Utils.isIp(args[0])) {
-                        target.add(args[0]);
-                    } else {
-                        OfflinePlayer oP = Bukkit.getOfflinePlayer(args[0]);
-                        if (ConfigManager.isBanAllIps()) {
-                            target.addAll(IpManager.getIpMap().get(oP.getUniqueId()));
+        return new BasicCommand() {
+            @Override
+            public void execute(@NonNull CommandSourceStack commandSourceStack, String @NonNull [] args) {
+                Utils.debug("Args: "+String.join(", ", args));
+                boolean temp = getId().startsWith("temp");
+                if ((temp && args.length >= 2) || (!temp && args.length >= 1)) {
+                    Utils.debug("Correct args count");
+                    List<String> target = new ArrayList<>();
+                    if (targetType() == TargetType.IP) {
+                        if (Utils.isIp(args[0])) {
+                            target.add(args[0]);
                         } else {
-                            target.add(oP.getUniqueId().toString());
+                            OfflinePlayer oP = Bukkit.getOfflinePlayer(args[0]);
+                            if (ConfigManager.isBanAllIps()) {
+                                target.addAll(IpManager.getIpMap().get(oP.getUniqueId()));
+                            } else {
+                                target.add(oP.getUniqueId().toString());
+                            }
                         }
-                    }
-                } else {
-                    target.add(Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString());
-                }
-                long duration;
-                boolean console = !(commandSourceStack.getSender() instanceof Player);
-                String reason;
-                if (temp) {
-                    duration = System.currentTimeMillis()+Utils.parseTime(args[1]);
-                    if (args.length > 2) {
-                        List<String> argsList = new ArrayList<>(Arrays.asList(args));
-                        argsList.removeFirst();
-                        argsList.removeFirst();
-
-                        reason = Strings.join(argsList, ' ');
                     } else {
-                        reason = null;
+                        target.add(Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString());
                     }
-                } else {
-                    duration = isInstant() ? System.currentTimeMillis()+1000L : -1L;
-                    if (args.length > 1) {
-                        List<String> argsList = new ArrayList<>(Arrays.asList(args));
-                        argsList.removeFirst();
+                    long duration;
+                    boolean console = !(commandSourceStack.getSender() instanceof Player);
+                    String reason;
+                    if (temp) {
+                        duration = System.currentTimeMillis()+Utils.parseTime(args[1]);
+                        if (args.length > 2) {
+                            List<String> argsList = new ArrayList<>(Arrays.asList(args));
+                            argsList.removeFirst();
+                            argsList.removeFirst();
 
-                        reason = Strings.join(argsList, ' ');
+                            reason = Strings.join(argsList, ' ');
+                        } else {
+                            reason = null;
+                        }
                     } else {
-                        reason = null;
+                        duration = isInstant() ? System.currentTimeMillis()+1000L : -1L;
+                        if (args.length > 1) {
+                            List<String> argsList = new ArrayList<>(Arrays.asList(args));
+                            argsList.removeFirst();
+
+                            reason = Strings.join(argsList, ' ');
+                        } else {
+                            reason = null;
+                        }
+                        Utils.debug("Correct args count. Reason "+reason);
                     }
-                    Utils.debug("Correct args count. Reason "+reason);
-                }
-                target.forEach(s -> {
-                    try {
-                        Utils.punish(s, this, duration, reason, console ? null : commandSourceStack.getPlayerOrThrow().getUniqueId());
-                    } catch (CommandSyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            } else {
-                if (temp) {
-                    Utils.sendMessage(commandSourceStack.getSender(), "temp-punish-usage", getId());
+                    target.forEach(s -> {
+                        try {
+                            Utils.punish(s, PunishmentType.this, duration, reason, console ? null : commandSourceStack.getPlayerOrThrow().getUniqueId());
+                        } catch (CommandSyntaxException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
-                    Utils.sendMessage(commandSourceStack.getSender(), "punish-usage", getId());
+                    if (temp) {
+                        Utils.sendMessage(commandSourceStack.getSender(), "temp-punish-usage", getId());
+                    } else {
+                        Utils.sendMessage(commandSourceStack.getSender(), "punish-usage", getId());
+                    }
                 }
+            }
+
+            @Override
+            public @NonNull Collection<String> suggest(@NonNull CommandSourceStack commandSourceStack, String @NonNull [] args) {
+                return args.length < 1 ? Bukkit.getOnlinePlayers().stream().map(Player::getName).toList() : new ArrayList<>();
             }
         };
     }
 
     public BasicCommand getUnCommandHandler() {
-        return isInstant() ? null : (commandSourceStack, args) -> {
-            if (args.length < 1) {
-                Utils.sendMessage(commandSourceStack.getSender(), "un-usage");
-                return;
-            }
-
-            String target = args[0];
-            if (!isPunished(target)) {
-                Utils.sendMessage(commandSourceStack.getSender(), "not-punished", target, getVerb());
-            }
-
-            if (targetType() == TargetType.IP) {
-                if (Utils.isIp(target)) {
-                    Utils.unpunish(target, this);
-                } else {
-                    for (String s : IpManager.getIpMap().getOrDefault(Bukkit.getOfflinePlayer(target).getUniqueId(), new ArrayList<>())) {
-                        Utils.unpunish(s, this);
-                    }
+        //TODO TAB Completion
+        return isInstant() ? null : new BasicCommand() {
+            @Override
+            public void execute(CommandSourceStack commandSourceStack, String[] args) {
+                if (args.length < 1) {
+                    Utils.sendMessage(commandSourceStack.getSender(), "un-usage");
+                    return;
                 }
-            } else {
-                Utils.unpunish(Bukkit.getOfflinePlayer(target).getUniqueId().toString(), this);
+
+                String target = args[0];
+                if (!isPunished(Utils.isIp(target) ? target : Bukkit.getOfflinePlayer(target).getUniqueId().toString())) {
+                    Utils.sendMessage(commandSourceStack.getSender(), "not-punished", target, getVerb());
+                    return;
+                }
+
+                if (targetType() == TargetType.IP) {
+                    if (Utils.isIp(target)) {
+                        Utils.unpunish(target, PunishmentType.this);
+                    } else {
+                        for (String s : IpManager.getIpMap().getOrDefault(Bukkit.getOfflinePlayer(target).getUniqueId(), new ArrayList<>())) {
+                            Utils.unpunish(s, PunishmentType.this);
+                        }
+                    }
+                } else {
+                    Utils.unpunish(Bukkit.getOfflinePlayer(target).getUniqueId().toString(), PunishmentType.this);
+                }
             }
 
+            @Override
+            public @NonNull Collection<String> suggest(@NonNull CommandSourceStack commandSourceStack, String @NonNull [] args) {
+                return args.length < 1 ? Bukkit.getOnlinePlayers().stream().map(Player::getName).toList() : new ArrayList<>();
+            }
         };
     }
 

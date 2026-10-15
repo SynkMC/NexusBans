@@ -1,5 +1,6 @@
 alert-on-attempt: true #Alert player with the nexusbans.alert permission if, for example, a muted player tries to chat
 ban-all-ips: true #When using ipban or ipmute on a player and not a specific IP, whether to ban all the IPs this player has used in the past or only their current one
+date-format: yyyy-MM-dd HH:mm:ss #Warning: case-sensitive
 messages:
   prefix: "<dark_gray>[<gradient:#FFAA00:#940000>NexusBans</gradient><dark_gray>] » <reset>"
   temp-punish-usage: "<red>Usage: /%s1% [target] [duration] (reason)"
@@ -22,3 +23,5 @@ messages:
   not-punished: "<dark_red>%s1% <red>wasn't %s2%!"
   unpunished: "<dark_red>%s1% <red>was un%s2%!"
   unpunished-notify: "<green>You were un%s1%!"
+  reloaded: "<green>The plugin was reloaded in %s1% ms!"
+  history-usage: "<red>Usage: /history <player/IP>"

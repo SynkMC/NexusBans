@@ -27,6 +27,7 @@ public class ConfigManager {
     @Getter private static boolean debug;
     @Getter private static boolean alertAttempt;
     @Getter private static boolean banAllIps;
+    @Getter private static String dateFormat;
 
     private static void updateConfig() throws IOException {
         if (!core.getDataFolder().exists()) core.getDataFolder().mkdirs();
@@ -70,5 +71,6 @@ public class ConfigManager {
         debug = config.contains("debug") && config.getBoolean("debug");
         alertAttempt = config.getBoolean("alert-on-attempt");
         banAllIps = config.getBoolean("ban-all-ips");
+        dateFormat = config.getString("date-format");
     }
 }

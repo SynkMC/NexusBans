@@ -1,9 +1,13 @@
 package cc.synkdev.nexusbans;
 
+import cc.synkdev.nexusbans.command.HistoryCommand;
+import cc.synkdev.nexusbans.command.NbCommand;
 import cc.synkdev.nexusbans.listener.JoinIpListener;
 import cc.synkdev.nexusbans.manager.ConfigManager;
+import cc.synkdev.nexusbans.manager.GuiManager;
 import cc.synkdev.nexusbans.manager.PunishmentManager;
 import cc.synkdev.nexusbans.manager.Utils;
+import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -18,8 +22,12 @@ public final class NexusBans extends JavaPlugin {
         instance = this;
         ConfigManager.load();
         PunishmentManager.registerTypes(this);
-
+        GuiManager.reloadGuis(this);
         Bukkit.getPluginManager().registerEvents(new JoinIpListener(), this);
+
+        PaperCommandManager pcm = new PaperCommandManager(this);
+        pcm.registerCommand(new NbCommand());
+        pcm.registerCommand(new HistoryCommand());
     }
 
     public Component getPrefix() {

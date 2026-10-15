@@ -1,0 +1,32 @@
+title: "Punishment history"
+rows: 6
+filler: "GRAY_STAINED_GLASS_PANE"
+items:
+  nextpage:
+    row: 6
+    col: 6
+    name: "Next page"
+    type: "ARROW"
+    lore:
+      - "Click to view the next page"
+  prevpage:
+    row: 6
+    col: 4
+    name: "Previous page"
+    type: "ARROW"
+    lore:
+      - "Click to view the previous page"
+  close:
+    row: 6
+    col: 5
+    name: "Close"
+    type: "BARRIER"
+  punishment:
+    type: "PAPER"
+    name: "%s1%'s %s2%" #Example: Notch's mute
+    lore:
+      - "  <gold>Type: <yellow>%s1%"
+      - "  <gold>Executor: <yellow>%s2%"
+      - "  <gold>Reason: <yellow>%s3%"
+      - "  <gold>Expiry: <yellow>%s4%"
+      - "  <gold>Given on: <yellow>%s4%"
