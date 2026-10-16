@@ -2,6 +2,7 @@ package cc.synkdev.nexusbans.gui;
 
 import cc.synkdev.gui.builder.item.ItemBuilder;
 import cc.synkdev.gui.guis.Gui;
+import cc.synkdev.nexusbans.manager.IpManager;
 import cc.synkdev.nexusbans.manager.PunishmentManager;
 import cc.synkdev.nexusbans.manager.Utils;
 import cc.synkdev.nexusbans.object.PluginGui;
@@ -13,6 +14,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,6 +28,14 @@ public class HistoryGui extends PluginGui {
                 .create();
 
         Map<UUID, Punishment> map = PunishmentManager.getPunishMap().getOrDefault(target, new PunishmentProfile(target)).getPunishmentMap();
+        try {
+            UUID uuid = UUID.fromString(target);
+            for (String s : IpManager.getIpMap().getOrDefault(uuid, new ArrayList<>())) {
+                map.putAll(PunishmentManager.getPunishMap().getOrDefault(s, new PunishmentProfile(s)).getPunishmentMap());
+            }
+        } catch (IllegalArgumentException _) {
+            //Not a UUID then ignore
+        }
 
         int pageSize = 5*9;
         int min = ((page-1)*pageSize);

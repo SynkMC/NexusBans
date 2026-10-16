@@ -45,9 +45,8 @@ public class IpBan extends PunishmentType {
     @Override
     public Runnable execute(Punishment p) {
         return () -> {
-           Bukkit.getOnlinePlayers().stream().filter(pl -> pl.getAddress().getHostName().equals(p.getTarget())).forEach(player -> {
-               player.kick(Utils.translate(p.getReason() == null ? "ipbanned" : "ipbanned-reason", p.getReason()));
-           });
+           Bukkit.getOnlinePlayers().stream().filter(pl -> pl.getAddress().getHostName().equals(p.getTarget()) && !pl.hasPermission("nexusbans.ipban.exempt"))
+                   .forEach(player -> player.kick(Utils.translate(p.getReason() == null ? "ipbanned" : "ipbanned-reason", p.getReason())));
         };
     }
 

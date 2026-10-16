@@ -25,3 +25,5 @@ messages:
   unpunished-notify: "<green>You were un%s1%!"
   reloaded: "<green>The plugin was reloaded in %s1% ms!"
   history-usage: "<red>Usage: /history <player/IP>"
+  never: "Never"
+  no-ip: "<red>%s1% has no known IP on the server!"

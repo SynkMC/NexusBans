@@ -76,10 +76,14 @@ public abstract class PunishmentType implements Listener {
                         } else {
                             OfflinePlayer oP = Bukkit.getOfflinePlayer(args[0]);
                             if (ConfigManager.isBanAllIps()) {
-                                target.addAll(IpManager.getIpMap().get(oP.getUniqueId()));
+                                target.addAll(IpManager.getIpMap().getOrDefault(oP.getUniqueId(), new ArrayList<>()));
                             } else {
                                 target.add(oP.getUniqueId().toString());
                             }
+                        }
+
+                        if (target.isEmpty()) {
+                            Utils.sendMessage(commandSourceStack.getSender(), "no-ip", args[0]);
                         }
                     } else {
                         target.add(Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString());
@@ -134,7 +138,6 @@ public abstract class PunishmentType implements Listener {
     }
 
     public BasicCommand getUnCommandHandler() {
-        //TODO TAB Completion
         return isInstant() ? null : new BasicCommand() {
             @Override
             public void execute(CommandSourceStack commandSourceStack, String[] args) {
@@ -170,7 +173,14 @@ public abstract class PunishmentType implements Listener {
     }
 
     public boolean isPunished(String target) {
-        return Utils.isPunished(target, this);
+        boolean isUUID = true;
+        UUID uuid = null;
+        try {
+            uuid = UUID.fromString(target);
+        } catch (Exception _) {
+            isUUID = false;
+        }
+        return Utils.isPunished(target, this) || (isUUID && IpManager.getIpMap().getOrDefault(uuid, new ArrayList<>()).stream().anyMatch(this::isPunished));
     }
 
     public boolean isPunished(Player p) {

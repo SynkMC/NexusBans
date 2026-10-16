@@ -40,6 +40,7 @@ public class Utils {
         }
         if (placeholders.length > 0) {
             for (int i = 0; i < placeholders.length; i++) {
+                if (placeholders[i] == null) continue;
                 msg = msg.replace("%s"+(i+1)+"%", placeholders[i]);
             }
         }
@@ -104,11 +105,9 @@ public class Utils {
         return sb.toString().trim();
     }
     public static Punishment getActivePunishment(String string, PunishmentType type) {
-        PunishmentManager.getPunishMap().forEach((s, punishmentProfile) -> {
+        PunishmentManager.getPunishMap().values().forEach(punishmentProfile -> {
             debug("Profile target:" +punishmentProfile.getTarget());
-            punishmentProfile.getPunishmentMap().forEach((uuid, punishment) -> {
-                debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), punishment.getExecutor().toString(), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+""));
-            });
+            punishmentProfile.getPunishmentMap().values().forEach(punishment -> debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), punishment.getExecutor().toString(), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+"")));
         });
         Map.Entry<UUID, Punishment> entry = PunishmentManager.getPunishMap().getOrDefault(string, new PunishmentProfile(string)).getPunishmentMap().entrySet().stream().filter(mapEntry -> mapEntry.getValue().isActive() && mapEntry.getValue().getType().equals(type)).findFirst().orElse(null);
         if (entry == null) {
@@ -117,7 +116,8 @@ public class Utils {
         return entry.getValue();
     }
     public static Punishment getActivePunishment(Player player, PunishmentType type) {
-        return getActivePunishment(player.getUniqueId().toString(), type);
+        Punishment ip = getActivePunishment(player.getAddress().getHostName(), type);
+        return ip == null ? getActivePunishment(player.getUniqueId().toString(), type) : ip;
     }
     public static long getTimeRemaining(String string, PunishmentType type) {
         Punishment punishment = getActivePunishment(string, type);
@@ -134,6 +134,10 @@ public class Utils {
 
     public static void sendMessage(@NotNull CommandSender sender, String key, String... args) {
         sender.sendMessage(NexusBans.getInstance().getPrefix().append(translate(key, args)));
+    }
+
+    public static void sendMessageLiteral(CommandSender sender, String s) {
+        sender.sendMessage(NexusBans.getInstance().getPrefix().append(minify(s)));
     }
 
     public static long parseTime(String time) {
@@ -156,17 +160,13 @@ public class Utils {
 
         return totalMillis*1000;
     }
-
-    public static PunishmentType getPunishmentType(String id) {
-        return PunishmentManager.getPTypes().stream().filter(pType -> pType.getId().equalsIgnoreCase(id)).findFirst().orElse(null);
-    }
     public static void punish(String target, PunishmentType type, long expiry, String reason, UUID executor) {
         Punishment punishment = new Punishment(type, target, executor, reason, expiry);
         PunishmentProfile profile = PunishmentManager.getPunishMap().getOrDefault(target, new PunishmentProfile(target));
         profile.getPunishmentMap().put(punishment.getUuid(), punishment);
         PunishmentManager.getPunishMap().put(target, profile);
 
-        boolean temp = expiry != -1L;
+        boolean temp = expiry != -1L && !type.isInstant();
         Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> sendMessage(player, temp ? "temp-punishment-success" : "punishment-success", executor == null ? "Console" : getName(executor), type.getVerb(), Utils.getName(target), type.isInstant() ? reason : parseTime(getTimeRemaining(target, type))));
         getOnlinePlayers(target).forEach(player -> sendMessage(player, temp ? "temp-punished-notify" : "punished-notify", type.getVerb(), parseTime(getTimeRemaining(target, type))));
         type.executePunishment(punishment);
@@ -193,9 +193,15 @@ public class Utils {
             return Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target))
                     .map(OfflinePlayer::getPlayer).toList();
         } else {
-            OfflinePlayer oP = Bukkit.getOfflinePlayer(UUID.fromString(target));
-            if (oP.isOnline()) return Collections.singletonList(oP.getPlayer());
-            else return Collections.emptyList();
+            try {
+                OfflinePlayer oP = Bukkit.getOfflinePlayer(UUID.fromString(target));
+                if (oP.isOnline()) return Collections.singletonList(oP.getPlayer());
+                else return Collections.emptyList();
+            } catch (IllegalArgumentException _) {
+                Bukkit.getOnlinePlayers().forEach(player -> log(player.getAddress().getHostName()+", "+player.getAddress().toString()));
+                return Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target))
+                        .map(OfflinePlayer::getPlayer).toList();
+            }
         }
     }
     public static void updatePunishment(Punishment p) {
@@ -212,11 +218,8 @@ public class Utils {
         punishment.setExpiry(System.currentTimeMillis());
         updatePunishment(punishment);
 
-        Utils.getOnlinePlayers(target).forEach(player -> {
-            PunishmentManager.alert("unpunished", player.getName(), pt.getVerb());
-            Utils.sendMessage(player, "unpunished-notify", pt.getVerb()
-            );
-        });
+        Utils.getOnlinePlayers(target).forEach(player -> Utils.sendMessage(player, "unpunished-notify", pt.getVerb()));
+        PunishmentManager.alert("unpunished", getNameOrIP(target), pt.getVerb());
     }
 
     public static Component minify(String s) {
@@ -228,6 +231,7 @@ public class Utils {
     }
 
     public static String formatTimestamp(long timestamp) {
+        if (timestamp < 0L) return ConfigManager.getMessages().getString("never");
         Date date = new Date(timestamp);
 
         SimpleDateFormat sdf = new SimpleDateFormat(ConfigManager.getDateFormat());
