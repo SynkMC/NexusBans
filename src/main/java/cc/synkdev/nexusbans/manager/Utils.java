@@ -172,7 +172,7 @@ public class Utils {
         type.executePunishment(punishment);
     }
 
-    private static String getName(String target) {
+    public static String getName(String target) {
         try {
             UUID uuid = UUID.fromString(target);
             return Bukkit.getOfflinePlayer(uuid).getName();
@@ -233,5 +233,9 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat(ConfigManager.getDateFormat());
         sdf.setTimeZone(TimeZone.getDefault());
         return sdf.format(date);
+    }
+
+    public static String getNameOrIP(String target) {
+        return isIp(target) ? target : getName(target);
     }
 }

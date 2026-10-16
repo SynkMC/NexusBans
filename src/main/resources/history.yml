@@ -5,28 +5,35 @@ items:
   nextpage:
     row: 6
     col: 6
-    name: "Next page"
+    name: "<reset>Next page"
     type: "ARROW"
     lore:
       - "Click to view the next page"
   prevpage:
     row: 6
     col: 4
-    name: "Previous page"
+    name: "<reset>Previous page"
     type: "ARROW"
     lore:
       - "Click to view the previous page"
   close:
     row: 6
     col: 5
-    name: "Close"
+    name: "<red>Close"
     type: "BARRIER"
   punishment:
     type: "PAPER"
-    name: "%s1%'s %s2%" #Example: Notch's mute
+    name: "<yellow>%s1%'s %s2%" #Example: Notch's mute
     lore:
       - "  <gold>Type: <yellow>%s1%"
       - "  <gold>Executor: <yellow>%s2%"
       - "  <gold>Reason: <yellow>%s3%"
       - "  <gold>Expiry: <yellow>%s4%"
-      - "  <gold>Given on: <yellow>%s4%"
+      - "  <gold>Given on: <yellow>%s5%"
+  empty:
+    row: 3
+    col: 5
+    type: "BUCKET"
+    name: "<red>No punishments!"
+    lore:
+      - "<dark_gray>%s1% has never received a punishment!"
