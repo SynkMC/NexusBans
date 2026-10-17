@@ -15,7 +15,7 @@ public class IpManager {
 
     public static void storeIP(PlayerJoinEvent event) {
         List<String> list = ipMap.getOrDefault(event.getPlayer().getUniqueId(), new ArrayList<>());
-        String ip = Objects.requireNonNull(event.getPlayer().getAddress()).getHostName();
+        String ip = Objects.requireNonNull(event.getPlayer().getAddress()).getAddress().getHostAddress();
         if (!list.contains(ip)) list.add(ip);
 
         ipMap.put(event.getPlayer().getUniqueId(), list);

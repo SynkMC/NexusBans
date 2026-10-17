@@ -186,6 +186,6 @@ public abstract class PunishmentType implements Listener {
     }
 
     public boolean isPunished(Player p) {
-        return (isPunished(p.getUniqueId().toString()) || isPunished(Objects.requireNonNull(p.getAddress()).getHostName())) && !p.hasPermission("nexusbans." + getId() + ".exempt");
+        return (isPunished(p.getUniqueId().toString()) || isPunished(Objects.requireNonNull(p.getAddress()).getAddress().getHostAddress())) && !p.hasPermission("nexusbans." + getId() + ".exempt");
     }
 }

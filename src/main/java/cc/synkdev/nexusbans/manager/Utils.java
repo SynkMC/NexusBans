@@ -121,7 +121,7 @@ public class Utils {
     }
 
     public static Punishment getActivePunishment(Player player, PunishmentType type) {
-        Punishment ip = getActivePunishment(Objects.requireNonNull(player.getAddress()).getHostName(), type);
+        Punishment ip = getActivePunishment(Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress(), type);
         return ip == null ? getActivePunishment(player.getUniqueId().toString(), type) : ip;
     }
 
@@ -204,8 +204,8 @@ public class Utils {
 
     public static List<Player> getOnlinePlayers(String target) {
         if (isIp(target)) {
-            Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getHostName() + ", " + player.getAddress().toString()));
-            return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getHostName().equals(target))
+            Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress() + ", " + player.getAddress().toString()));
+            return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress().equals(target))
                     .map(OfflinePlayer::getPlayer).toList();
         } else {
             try {
@@ -213,8 +213,8 @@ public class Utils {
                 if (oP.isOnline()) return Collections.singletonList(oP.getPlayer());
                 else return Collections.emptyList();
             } catch (IllegalArgumentException _) {
-                Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getHostName() + ", " + player.getAddress().toString()));
-                return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getHostName().equals(target))
+                Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress() + ", " + player.getAddress().toString()));
+                return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress().equals(target))
                         .map(OfflinePlayer::getPlayer).toList();
             }
         }
