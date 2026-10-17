@@ -79,7 +79,7 @@ public class HistoryGui extends PluginGui {
                                 config.getStringList("items.punishment.lore"),
                                 punish.getType().getId(),
                                 punish.getExecutor() == null ? "Console" : Utils.getName(punish.getExecutor()),
-                                punish.getReason() == null ? "None" : punish.getReason(),
+                                punish.getReason() == null || punish.getReason().isEmpty() ? "None" : punish.getReason(),
                                 Utils.formatTimestamp(punish.getExpiry()),
                                 Utils.formatTimestamp(punish.getTimestamp())))
                         .asGuiItem());

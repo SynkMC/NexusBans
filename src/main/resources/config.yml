@@ -27,3 +27,11 @@ messages:
   history-usage: "<red>Usage: /history <player/IP>"
   never: "Never"
   no-ip: "<red>%s1% has no known IP on the server!"
+storage:
+  use-database: false #If false, defaults to file storage
+  database:
+    type: MYSQL #Options: MYSQL, MONGODB, SQLITE
+    host: 127.0.0.1:3306
+    database: nexusbans
+    user: user
+    password: P@ssw0rd!

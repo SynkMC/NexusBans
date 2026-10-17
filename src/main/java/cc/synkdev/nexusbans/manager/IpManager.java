@@ -18,5 +18,6 @@ public class IpManager {
         if (!list.contains(ip)) list.add(ip);
 
         ipMap.put(event.getPlayer().getUniqueId(), list);
+        ConfigManager.getStorage().save(event.getPlayer().getUniqueId(), list);
     }
 }

@@ -1,6 +1,10 @@
 package cc.synkdev.nexusbans.manager;
 
 import cc.synkdev.nexusbans.NexusBans;
+import cc.synkdev.nexusbans.object.StorageType;
+import cc.synkdev.nexusbans.object.storage.FileStorage;
+import cc.synkdev.nexusbans.object.storage.MongoDB;
+import cc.synkdev.nexusbans.object.storage.MySQL;
 import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -23,11 +27,13 @@ public class ConfigManager {
     @Getter private static final List<String> skip = new ArrayList<>();
     private static YamlConfiguration config;
     @Getter private static ConfigurationSection messages;
+    @Getter private static ConfigurationSection db;
 
     @Getter private static boolean debug;
     @Getter private static boolean alertAttempt;
     @Getter private static boolean banAllIps;
     @Getter private static String dateFormat;
+    @Getter private static StorageType storage;
 
     private static void updateConfig() throws IOException {
         if (!core.getDataFolder().exists()) core.getDataFolder().mkdirs();
@@ -72,5 +78,19 @@ public class ConfigManager {
         alertAttempt = config.getBoolean("alert-on-attempt");
         banAllIps = config.getBoolean("ban-all-ips");
         dateFormat = config.getString("date-format");
+        db = config.getConfigurationSection("storage").getConfigurationSection("database");
+
+        if (config.getBoolean("storage.use-database")) {
+            switch (config.getString("storage.database.type")) {
+                case "MYSQL" -> storage = new MySQL();
+                case "MONGODB" -> storage = new MongoDB();
+                case null, default -> {
+                    Utils.log("Invalid database type provided: "+config.getString("storage.database.type"));
+                    storage = new FileStorage();
+                }
+            }
+        } else {
+            storage = new FileStorage();
+        }
     }
 }

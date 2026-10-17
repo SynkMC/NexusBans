@@ -107,7 +107,7 @@ public class Utils {
     public static Punishment getActivePunishment(String string, PunishmentType type) {
         PunishmentManager.getPunishMap().values().forEach(punishmentProfile -> {
             debug("Profile target:" +punishmentProfile.getTarget());
-            punishmentProfile.getPunishmentMap().values().forEach(punishment -> debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), punishment.getExecutor().toString(), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+"")));
+            punishmentProfile.getPunishmentMap().values().forEach(punishment -> debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), (punishment.getExecutor() == null ? "Console" : punishment.getExecutor().toString()), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+"")));
         });
         Map.Entry<UUID, Punishment> entry = PunishmentManager.getPunishMap().getOrDefault(string, new PunishmentProfile(string)).getPunishmentMap().entrySet().stream().filter(mapEntry -> mapEntry.getValue().isActive() && mapEntry.getValue().getType().equals(type)).findFirst().orElse(null);
         if (entry == null) {
@@ -165,11 +165,16 @@ public class Utils {
         PunishmentProfile profile = PunishmentManager.getPunishMap().getOrDefault(target, new PunishmentProfile(target));
         profile.getPunishmentMap().put(punishment.getUuid(), punishment);
         PunishmentManager.getPunishMap().put(target, profile);
+        savePunishment(punishment);
 
         boolean temp = expiry != -1L && !type.isInstant();
         Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("nexusbans.alert")).forEach(player -> sendMessage(player, temp ? "temp-punishment-success" : "punishment-success", executor == null ? "Console" : getName(executor), type.getVerb(), Utils.getName(target), type.isInstant() ? reason : parseTime(getTimeRemaining(target, type))));
         getOnlinePlayers(target).forEach(player -> sendMessage(player, temp ? "temp-punished-notify" : "punished-notify", type.getVerb(), parseTime(getTimeRemaining(target, type))));
         type.executePunishment(punishment);
+    }
+
+    public static PunishmentType getPunishmentType(String id) {
+        return PunishmentManager.getPTypes().stream().filter(pType -> pType.getId().equalsIgnoreCase(id)).findFirst().orElse(null);
     }
 
     public static String getName(String target) {
@@ -209,6 +214,7 @@ public class Utils {
         profile.getPunishmentMap().put(p.getUuid(), p);
 
         PunishmentManager.getPunishMap().put(p.getTarget(), profile);
+        savePunishment(p);
     }
 
     public static void unpunish(String target, PunishmentType pt) {
@@ -241,5 +247,8 @@ public class Utils {
 
     public static String getNameOrIP(String target) {
         return isIp(target) ? target : getName(target);
+    }
+    public static void savePunishment(Punishment p) {
+        ConfigManager.getStorage().save(p);
     }
 }
