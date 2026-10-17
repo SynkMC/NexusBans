@@ -12,7 +12,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import java.util.*;
 
@@ -28,18 +27,18 @@ public class MongoDB extends StorageType {
 
         Map<String, PunishmentProfile> profileMap = new HashMap<>();
         collection.find().forEach(document -> {
-                String target = document.getString("target");
-                PunishmentProfile prof = profileMap.getOrDefault(target, new PunishmentProfile(target));
-                UUID uuid = UUID.fromString(document.getString("_id"));
-                prof.getPunishmentMap().put(uuid, new Punishment(uuid,
-                        Utils.getPunishmentType(document.getString("type")),
-                        target,
-                        document.getString("executor").isEmpty() ? null : UUID.fromString(document.getString("executor")),
-                        document.getString("reason").isEmpty() ? null : document.getString("reason"),
-                        document.getLong("expiry"),
-                        document.getLong("timestamp")));
+            String target = document.getString("target");
+            PunishmentProfile prof = profileMap.getOrDefault(target, new PunishmentProfile(target));
+            UUID uuid = UUID.fromString(document.getString("_id"));
+            prof.getPunishmentMap().put(uuid, new Punishment(uuid,
+                    Utils.getPunishmentType(document.getString("type")),
+                    target,
+                    document.getString("executor").isEmpty() ? null : UUID.fromString(document.getString("executor")),
+                    document.getString("reason").isEmpty() ? null : document.getString("reason"),
+                    document.getLong("expiry"),
+                    document.getLong("timestamp")));
 
-                profileMap.put(target, prof);
+            profileMap.put(target, prof);
         });
 
         PunishmentManager.getPunishMap().clear();
@@ -81,8 +80,9 @@ public class MongoDB extends StorageType {
     }
 
     private String getConnString() {
-        return "mongodb+srv://"+ConfigManager.getDb().getString("user")+":"+ConfigManager.getDb().getString("password")+"@"+ ConfigManager.getDb().getString("host")+"/";
+        return "mongodb+srv://" + ConfigManager.getDb().getString("user") + ":" + ConfigManager.getDb().getString("password") + "@" + ConfigManager.getDb().getString("host") + "/";
     }
+
     private MongoDatabase getDb() {
         return MongoClients.create(getConnString()).getDatabase(Objects.requireNonNull(ConfigManager.getDb().getString("database")));
     }

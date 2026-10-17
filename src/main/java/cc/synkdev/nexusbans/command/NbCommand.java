@@ -19,7 +19,7 @@ public class NbCommand extends BaseCommand {
         long time = System.currentTimeMillis();
         ConfigManager.load();
         GuiManager.reloadGuis(NexusBans.getInstance());
-        Utils.sendMessage(sender, "reloaded", (System.currentTimeMillis()-time)+"");
+        Utils.sendMessage(sender, "reloaded", (System.currentTimeMillis() - time) + "");
     }
 
     @Subcommand("debug")
@@ -33,8 +33,8 @@ public class NbCommand extends BaseCommand {
         Utils.sendMessageLiteral(sender, "<green>The debug report has been pasted in the console.");
         Utils.debug("Punishment map:");
         PunishmentManager.getPunishMap().values().forEach(punishmentProfile -> {
-            Utils.debug("Target: "+punishmentProfile.getTarget());
-            Utils.debug("  "+ String.join(" | ", punishmentProfile.getPunishmentMap().values().stream()
+            Utils.debug("Target: " + punishmentProfile.getTarget());
+            Utils.debug("  " + String.join(" | ", punishmentProfile.getPunishmentMap().values().stream()
                     .map(punishment -> "UUID: " + punishment.getUuid().toString() + ", Type: " + punishment.getType().getId() + ", Executor: " + punishment.getExecutor() + ", Reason: " + punishment.getReason() + ", Expiry: " + punishment.getExpiry() + ", Timestamp: " + punishment.getTimestamp()).toList()));
         });
     }

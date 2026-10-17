@@ -6,15 +6,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.util.*;
 
 public class IpManager {
+    @Getter
+    private static final Map<UUID, List<String>> ipMap = new HashMap<>();
+
     private IpManager() {
         /* This utility class should not be instantiated */
     }
 
-    @Getter private static final Map<UUID, List<String>> ipMap = new HashMap<>();
-
     public static void storeIP(PlayerJoinEvent event) {
         List<String> list = ipMap.getOrDefault(event.getPlayer().getUniqueId(), new ArrayList<>());
-        String ip = event.getPlayer().getAddress().getHostName();
+        String ip = Objects.requireNonNull(event.getPlayer().getAddress()).getHostName();
         if (!list.contains(ip)) list.add(ip);
 
         ipMap.put(event.getPlayer().getUniqueId(), list);

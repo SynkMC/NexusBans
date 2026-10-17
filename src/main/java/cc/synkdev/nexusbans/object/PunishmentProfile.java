@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Getter @Setter @AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 public class PunishmentProfile {
     private String target;
     private Map<UUID, Punishment> punishmentMap;
@@ -26,7 +28,7 @@ public class PunishmentProfile {
         this.punishmentMap = new HashMap<>();
         for (Object o : obj.getJSONArray("punishments")) {
             JSONObject jObj = (JSONObject) o;
-            Utils.debug("Storing punishment "+jObj.getString("uuid"));
+            Utils.debug("Storing punishment " + jObj.getString("uuid"));
             punishmentMap.put(UUID.fromString(jObj.getString("uuid")), new Punishment(jObj));
         }
     }

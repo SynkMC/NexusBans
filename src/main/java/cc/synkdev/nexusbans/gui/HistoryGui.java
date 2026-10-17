@@ -37,9 +37,9 @@ public class HistoryGui extends PluginGui {
             //Not a UUID then ignore
         }
 
-        int pageSize = 5*9;
-        int min = ((page-1)*pageSize);
-        int maxPage = (map.size()+pageSize-1) / pageSize;
+        int pageSize = 5 * 9;
+        int min = ((page - 1) * pageSize);
+        int maxPage = (map.size() + pageSize - 1) / pageSize;
 
         gui.getFiller().fill(ItemBuilder.from(Material.valueOf(config.getString("filler"))).name(Component.text(" ")).asGuiItem());
 
@@ -71,8 +71,8 @@ public class HistoryGui extends PluginGui {
             for (int i = 0; i < pageSize; i++) {
                 if (map.size() <= i + min) break;
                 Punishment punish = map.values().stream().toList().get(i + min);
-                Utils.debug("Expiry: "+punish.getExpiry()+" "+Utils.formatTimestamp(punish.getExpiry()));
-                Utils.debug("Timestamp: "+punish.getTimestamp()+" "+Utils.formatTimestamp(punish.getTimestamp()));
+                Utils.debug("Expiry: " + punish.getExpiry() + " " + Utils.formatTimestamp(punish.getExpiry()));
+                Utils.debug("Timestamp: " + punish.getTimestamp() + " " + Utils.formatTimestamp(punish.getTimestamp()));
                 gui.setItem(i, ItemBuilder.from(Material.valueOf(config.getString("items.punishment.type")))
                         .name(Utils.translateLiteral(config.getString("items.punishment.name"), punish.getName(), punish.getType().getId()))
                         .lore(Utils.translateLiteralList(

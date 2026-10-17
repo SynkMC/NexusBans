@@ -48,7 +48,7 @@ public class Ban extends PunishmentType {
     public Runnable execute(Punishment p) {
         return () -> {
             OfflinePlayer oP = Bukkit.getOfflinePlayer(UUID.fromString(p.getTarget()));
-            Utils.debug("OfflinePlayer "+p.getTarget());
+            Utils.debug("OfflinePlayer " + p.getTarget());
             if (oP.isOnline()) {
                 Utils.debug("Online");
                 assert oP.getPlayer() != null;

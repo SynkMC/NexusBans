@@ -6,11 +6,9 @@ import cc.synkdev.nexusbans.object.Punishment;
 import cc.synkdev.nexusbans.object.PunishmentType;
 import cc.synkdev.nexusbans.object.TargetType;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
@@ -44,10 +42,8 @@ public class IpBan extends PunishmentType {
 
     @Override
     public Runnable execute(Punishment p) {
-        return () -> {
-           Bukkit.getOnlinePlayers().stream().filter(pl -> pl.getAddress().getHostName().equals(p.getTarget()) && !pl.hasPermission("nexusbans.ipban.exempt"))
-                   .forEach(player -> player.kick(Utils.translate(p.getReason() == null ? "ipbanned" : "ipbanned-reason", p.getReason())));
-        };
+        return () -> Bukkit.getOnlinePlayers().stream().filter(pl -> pl.getAddress().getHostName().equals(p.getTarget()) && !pl.hasPermission("nexusbans.ipban.exempt"))
+                .forEach(player -> player.kick(Utils.translate(p.getReason() == null ? "ipbanned" : "ipbanned-reason", p.getReason())));
     }
 
     @Override

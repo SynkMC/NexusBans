@@ -86,12 +86,13 @@ public class MySQL extends StorageType {
     public void save(UUID uuid, List<String> ipList) {
         String insert = "INSERT INTO `nb_ips` (uuid, ip) VALUES (?, ?) ON DUPLICATE KEY UPDATE `uuid` = VALUES(`uuid`), `ip` = VALUES (`IP`)";
         try (Connection conn = getConnection()) {
+            PreparedStatement prep = conn.prepareStatement(insert);
             for (String ip : ipList) {
-                PreparedStatement prep = conn.prepareStatement(insert);
                 prep.setString(1, uuid.toString());
                 prep.setString(2, ip);
-                prep.execute();
+                prep.addBatch();
             }
+            prep.executeBatch();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -113,7 +114,7 @@ public class MySQL extends StorageType {
                 "        unique (uuid)" +
                 ");";
 
-        
+
         String ips = "create table if not exists nb_ips" +
                 "(" +
                 "    id   int auto_increment" +
@@ -135,8 +136,9 @@ public class MySQL extends StorageType {
     }
 
     private String getConnString() {
-        return "jdbc:mysql://"+ ConfigManager.getDb().getString("host")+"/"+ConfigManager.getDb().getString("database");
+        return "jdbc:mysql://" + ConfigManager.getDb().getString("host") + "/" + ConfigManager.getDb().getString("database");
     }
+
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getConnString(), ConfigManager.getDb().getString("user"), ConfigManager.getDb().getString("password"));
     }

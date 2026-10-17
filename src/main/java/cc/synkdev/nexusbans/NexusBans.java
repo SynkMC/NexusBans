@@ -17,7 +17,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class NexusBans extends JavaPlugin {
 
-    @Getter private static NexusBans instance;
+    @Getter
+    private static NexusBans instance;
 
     @Override
     public void onEnable() {

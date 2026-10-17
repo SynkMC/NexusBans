@@ -1,7 +1,6 @@
 package cc.synkdev.nexusbans.object.punishment;
 
 import cc.synkdev.nexusbans.NexusBans;
-import cc.synkdev.nexusbans.manager.PunishmentManager;
 import cc.synkdev.nexusbans.manager.Utils;
 import cc.synkdev.nexusbans.object.Punishment;
 import cc.synkdev.nexusbans.object.PunishmentType;
@@ -9,7 +8,6 @@ import cc.synkdev.nexusbans.object.TargetType;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 
 import java.util.UUID;

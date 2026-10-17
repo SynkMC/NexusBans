@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class FileStorage extends StorageType {
+    private final File dataFolder = new File(NexusBans.getInstance().getDataFolder(), "data");
+    private final File punishFile = new File(dataFolder, "punishments.json");
+    private final File ipFile = new File(dataFolder, "ips.json");
+
     @Override
     public String getId() {
         return "file";
     }
-
-    private final File dataFolder = new File(NexusBans.getInstance().getDataFolder(), "data");
-    private final File punishFile = new File(dataFolder, "punishments.json");
-    private final File ipFile = new File(dataFolder, "ips.json");
 
     @Override
     public void init() {

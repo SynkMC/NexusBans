@@ -24,7 +24,8 @@ public class GuiManager {
                 PluginGui type = (PluginGui) clazz.getDeclaredConstructor().newInstance();
                 type.init(core);
             }
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

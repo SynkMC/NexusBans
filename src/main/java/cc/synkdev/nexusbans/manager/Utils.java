@@ -4,10 +4,6 @@ import cc.synkdev.nexusbans.NexusBans;
 import cc.synkdev.nexusbans.object.Punishment;
 import cc.synkdev.nexusbans.object.PunishmentProfile;
 import cc.synkdev.nexusbans.object.PunishmentType;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -16,6 +12,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Utils {
     private Utils() {
@@ -26,9 +25,11 @@ public class Utils {
         String msg = ConfigManager.getMessages().getString(key);
         return getComponent(msg, placeholders);
     }
+
     public static Component translateLiteral(String msg, String... placeholders) {
         return getComponent(msg, placeholders);
     }
+
     public static List<Component> translateLiteralList(List<String> list, String... placeholders) {
         return list.stream().map(s -> translateLiteral(s, placeholders)).toList();
     }
@@ -41,7 +42,7 @@ public class Utils {
         if (placeholders.length > 0) {
             for (int i = 0; i < placeholders.length; i++) {
                 if (placeholders[i] == null) continue;
-                msg = msg.replace("%s"+(i+1)+"%", placeholders[i]);
+                msg = msg.replace("%s" + (i + 1) + "%", placeholders[i]);
             }
         }
         return MiniMessage.miniMessage().deserialize(msg);
@@ -50,16 +51,18 @@ public class Utils {
     public static void log(Component message) {
         Bukkit.getConsoleSender().sendMessage(NexusBans.getInstance().getPrefix().append(message));
     }
+
     public static void log(String message) {
         Bukkit.getConsoleSender().sendMessage(NexusBans.getInstance().getPrefix().append(MiniMessage.miniMessage().deserialize(message)));
     }
 
     public static void debug(String message) {
-        if (ConfigManager.isDebug()) log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » "+message));
+        if (ConfigManager.isDebug()) log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » " + message));
     }
 
     public static void debug(Component component) {
-        if (ConfigManager.isDebug()) log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » ").append(component));
+        if (ConfigManager.isDebug())
+            log(MiniMessage.miniMessage().deserialize("<dark_gray>[DEBUG] » ").append(component));
     }
 
     public static boolean isPunished(String target, PunishmentType type) {
@@ -74,7 +77,7 @@ public class Utils {
 
     public static String parseTime(long time) {
         StringBuilder sb = new StringBuilder();
-        time = time+1;
+        time = time + 1;
         if (time >= 365 * 24 * 60 * 60) {
             sb.append((int) time / (365 * 24 * 60 * 60)).append("y ");
             time %= 365 * 24 * 60 * 60;
@@ -104,10 +107,11 @@ public class Utils {
         }
         return sb.toString().trim();
     }
+
     public static Punishment getActivePunishment(String string, PunishmentType type) {
         PunishmentManager.getPunishMap().values().forEach(punishmentProfile -> {
-            debug("Profile target:" +punishmentProfile.getTarget());
-            punishmentProfile.getPunishmentMap().values().forEach(punishment -> debug("Punishment: "+String.join(", ", punishment.getTarget(), punishment.getReason(), (punishment.getExecutor() == null ? "Console" : punishment.getExecutor().toString()), punishment.getExpiry()+"", punishment.getUuid().toString(), punishment.getTimestamp()+"")));
+            debug("Profile target:" + punishmentProfile.getTarget());
+            punishmentProfile.getPunishmentMap().values().forEach(punishment -> debug("Punishment: " + String.join(", ", punishment.getTarget(), punishment.getReason(), (punishment.getExecutor() == null ? "Console" : punishment.getExecutor().toString()), punishment.getExpiry() + "", punishment.getUuid().toString(), punishment.getTimestamp() + "")));
         });
         Map.Entry<UUID, Punishment> entry = PunishmentManager.getPunishMap().getOrDefault(string, new PunishmentProfile(string)).getPunishmentMap().entrySet().stream().filter(mapEntry -> mapEntry.getValue().isActive() && mapEntry.getValue().getType().equals(type)).findFirst().orElse(null);
         if (entry == null) {
@@ -115,15 +119,18 @@ public class Utils {
         }
         return entry.getValue();
     }
+
     public static Punishment getActivePunishment(Player player, PunishmentType type) {
-        Punishment ip = getActivePunishment(player.getAddress().getHostName(), type);
+        Punishment ip = getActivePunishment(Objects.requireNonNull(player.getAddress()).getHostName(), type);
         return ip == null ? getActivePunishment(player.getUniqueId().toString(), type) : ip;
     }
+
     public static long getTimeRemaining(String string, PunishmentType type) {
         Punishment punishment = getActivePunishment(string, type);
         if (punishment == null) return 0;
-        return (punishment.getExpiry()-System.currentTimeMillis())/1000;
+        return (punishment.getExpiry() - System.currentTimeMillis()) / 1000;
     }
+
     public static long getTimeRemaining(Player player, PunishmentType type) {
         return getTimeRemaining(player.getUniqueId().toString(), type);
     }
@@ -142,24 +149,25 @@ public class Utils {
 
     public static long parseTime(String time) {
         long totalMillis = 0;
-            if (time.endsWith("h")) {
-                totalMillis += Long.parseLong(time.replace("h", "")) * 60 * 60;
-            } else if (time.endsWith("m")) {
-                totalMillis += Long.parseLong(time.replace("m", "")) * 60;
-            } else if (time.endsWith("s")) {
-                totalMillis += Long.parseLong(time.replace("s", ""));
-            } else if (time.endsWith("d")) {
-                totalMillis += Long.parseLong(time.replace("d", "")) * 24 * 60 * 60;
-            } else if (time.endsWith("w")) {
-                totalMillis += Long.parseLong(time.replace("w", "")) * 7 * 24 * 60 * 60;
-            } else if (time.endsWith("mo")) {
-                totalMillis += Long.parseLong(time.replace("mo", "")) * 30 * 24 * 60 * 60;
-            } else if (time.endsWith("y")) {
-                totalMillis += Long.parseLong(time.replace("y", "")) * 365 * 24 * 60 * 60;
-            }
+        if (time.endsWith("h")) {
+            totalMillis += Long.parseLong(time.replace("h", "")) * 60 * 60;
+        } else if (time.endsWith("m")) {
+            totalMillis += Long.parseLong(time.replace("m", "")) * 60;
+        } else if (time.endsWith("s")) {
+            totalMillis += Long.parseLong(time.replace("s", ""));
+        } else if (time.endsWith("d")) {
+            totalMillis += Long.parseLong(time.replace("d", "")) * 24 * 60 * 60;
+        } else if (time.endsWith("w")) {
+            totalMillis += Long.parseLong(time.replace("w", "")) * 7 * 24 * 60 * 60;
+        } else if (time.endsWith("mo")) {
+            totalMillis += Long.parseLong(time.replace("mo", "")) * 30 * 24 * 60 * 60;
+        } else if (time.endsWith("y")) {
+            totalMillis += Long.parseLong(time.replace("y", "")) * 365 * 24 * 60 * 60;
+        }
 
-        return totalMillis*1000;
+        return totalMillis * 1000;
     }
+
     public static void punish(String target, PunishmentType type, long expiry, String reason, UUID executor) {
         Punishment punishment = new Punishment(type, target, executor, reason, expiry);
         PunishmentProfile profile = PunishmentManager.getPunishMap().getOrDefault(target, new PunishmentProfile(target));
@@ -189,13 +197,15 @@ public class Utils {
     public static String getName(UUID uuid) {
         return Bukkit.getOfflinePlayer(uuid).getName();
     }
+
     public static boolean isIp(String s) {
         return s.split("\\.").length == 4;
     }
+
     public static List<Player> getOnlinePlayers(String target) {
         if (isIp(target)) {
-            Bukkit.getOnlinePlayers().forEach(player -> log(player.getAddress().getHostName()+", "+player.getAddress().toString()));
-            return Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target))
+            Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getHostName() + ", " + player.getAddress().toString()));
+            return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getHostName().equals(target))
                     .map(OfflinePlayer::getPlayer).toList();
         } else {
             try {
@@ -203,12 +213,13 @@ public class Utils {
                 if (oP.isOnline()) return Collections.singletonList(oP.getPlayer());
                 else return Collections.emptyList();
             } catch (IllegalArgumentException _) {
-                Bukkit.getOnlinePlayers().forEach(player -> log(player.getAddress().getHostName()+", "+player.getAddress().toString()));
-                return Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostName().equals(target))
+                Bukkit.getOnlinePlayers().forEach(player -> log(Objects.requireNonNull(player.getAddress()).getHostName() + ", " + player.getAddress().toString()));
+                return Bukkit.getOnlinePlayers().stream().filter(player -> Objects.requireNonNull(player.getAddress()).getHostName().equals(target))
                         .map(OfflinePlayer::getPlayer).toList();
             }
         }
     }
+
     public static void updatePunishment(Punishment p) {
         PunishmentProfile profile = PunishmentManager.getPunishMap().getOrDefault(p.getTarget(), new PunishmentProfile(p.getTarget()));
         profile.getPunishmentMap().put(p.getUuid(), p);
@@ -219,7 +230,7 @@ public class Utils {
 
     public static void unpunish(String target, PunishmentType pt) {
         Punishment punishment = getActivePunishment(target, pt);
-        debug("Target: "+target + " Pt: "+pt.getId());
+        debug("Target: " + target + " Pt: " + pt.getId());
         if (punishment == null) return;
         punishment.setExpiry(System.currentTimeMillis());
         updatePunishment(punishment);
@@ -248,6 +259,7 @@ public class Utils {
     public static String getNameOrIP(String target) {
         return isIp(target) ? target : getName(target);
     }
+
     public static void savePunishment(Punishment p) {
         ConfigManager.getStorage().save(p);
     }

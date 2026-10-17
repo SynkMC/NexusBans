@@ -10,7 +10,9 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.UUID;
 
-@Getter @Setter @AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 public class Punishment {
     private UUID uuid;
     private PunishmentType type;
@@ -43,6 +45,7 @@ public class Punishment {
     public boolean isActive() {
         return System.currentTimeMillis() < getExpiry() || getExpiry() == -1L;
     }
+
     public String getName() {
         return type.targetType() == TargetType.IP ? target : Utils.getName(UUID.fromString(getTarget()));
     }

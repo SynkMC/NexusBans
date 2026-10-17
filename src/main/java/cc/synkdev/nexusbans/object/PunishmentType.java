@@ -22,11 +22,17 @@ import java.util.function.Consumer;
 
 public abstract class PunishmentType implements Listener {
     public abstract String getId();
+
     public abstract Class<? extends Event> eventClass();
+
     public abstract Consumer<Event> handleEvent();
+
     public abstract TargetType targetType();
+
     public abstract Boolean isInstant();
+
     public abstract Runnable execute(Punishment p);
+
     public abstract String getVerb();
 
     @Override
@@ -34,15 +40,11 @@ public abstract class PunishmentType implements Listener {
         return obj instanceof PunishmentType type && type.getId().equalsIgnoreCase(getId());
     }
 
-    public Boolean doPunish(OfflinePlayer p) {
-        return (targetType() == TargetType.PLAYER ? Utils.isPunished(p.getUniqueId().toString(), this) : (!p.isOnline() || Utils.isPunished(p.getPlayer().getAddress().getHostName(), this))) && (!p.isOnline() || !((Player) p).hasPermission("nexusstaff.punishment.bypass"));
-    }
-
     public Boolean doPunish(String s) {
         if (targetType() == TargetType.IP) {
             return Utils.isPunished(s, this);
         } else {
-            return Utils.isPunished(s, this) && (Utils.isOnline(UUID.fromString(s)) && !Bukkit.getPlayer(UUID.fromString(s)).hasPermission("nexusstaff.punishment.bypass"));
+            return Utils.isPunished(s, this) && (Utils.isOnline(UUID.fromString(s)) && !Objects.requireNonNull(Bukkit.getPlayer(UUID.fromString(s))).hasPermission("nexusstaff.punishment.bypass"));
         }
     }
 
@@ -53,7 +55,7 @@ public abstract class PunishmentType implements Listener {
                 handleEvent().accept(event);
             }
         };
-        Utils.debug("Registered pType "+getId());
+        Utils.debug("Registered pType " + getId());
         Bukkit.getPluginManager().registerEvent(eventClass(), this, EventPriority.HIGH, executor, NexusBans.getInstance());
     }
 
@@ -65,7 +67,7 @@ public abstract class PunishmentType implements Listener {
         return new BasicCommand() {
             @Override
             public void execute(@NonNull CommandSourceStack commandSourceStack, String @NonNull [] args) {
-                Utils.debug("Args: "+String.join(", ", args));
+                Utils.debug("Args: " + String.join(", ", args));
                 boolean temp = getId().startsWith("temp");
                 if ((temp && args.length >= 2) || (!temp && args.length >= 1)) {
                     Utils.debug("Correct args count");
@@ -92,7 +94,7 @@ public abstract class PunishmentType implements Listener {
                     boolean console = !(commandSourceStack.getSender() instanceof Player);
                     String reason;
                     if (temp) {
-                        duration = System.currentTimeMillis()+Utils.parseTime(args[1]);
+                        duration = System.currentTimeMillis() + Utils.parseTime(args[1]);
                         if (args.length > 2) {
                             List<String> argsList = new ArrayList<>(Arrays.asList(args));
                             argsList.removeFirst();
@@ -103,7 +105,7 @@ public abstract class PunishmentType implements Listener {
                             reason = null;
                         }
                     } else {
-                        duration = isInstant() ? System.currentTimeMillis()+1000L : -1L;
+                        duration = isInstant() ? System.currentTimeMillis() + 1000L : -1L;
                         if (args.length > 1) {
                             List<String> argsList = new ArrayList<>(Arrays.asList(args));
                             argsList.removeFirst();
@@ -112,7 +114,7 @@ public abstract class PunishmentType implements Listener {
                         } else {
                             reason = null;
                         }
-                        Utils.debug("Correct args count. Reason "+reason);
+                        Utils.debug("Correct args count. Reason " + reason);
                     }
                     target.forEach(s -> {
                         try {
@@ -184,6 +186,6 @@ public abstract class PunishmentType implements Listener {
     }
 
     public boolean isPunished(Player p) {
-        return (isPunished(p.getUniqueId().toString()) || isPunished(p.getAddress().getHostName())) && !p.hasPermission("nexusbans."+getId()+".exempt");
+        return (isPunished(p.getUniqueId().toString()) || isPunished(Objects.requireNonNull(p.getAddress()).getHostName())) && !p.hasPermission("nexusbans." + getId() + ".exempt");
     }
 }
