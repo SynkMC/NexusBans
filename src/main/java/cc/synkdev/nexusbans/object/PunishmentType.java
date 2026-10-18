@@ -67,6 +67,10 @@ public abstract class PunishmentType implements Listener {
         return new BasicCommand() {
             @Override
             public void execute(@NonNull CommandSourceStack commandSourceStack, String @NonNull [] args) {
+                if (!commandSourceStack.getSender().hasPermission("nexusbans."+getId())) {
+                    Utils.sendMessage(commandSourceStack.getSender(), "no-permission");
+                    return;
+                }
                 Utils.debug("Args: " + String.join(", ", args));
                 boolean temp = getId().startsWith("temp");
                 if ((temp && args.length >= 2) || (!temp && args.length >= 1)) {
@@ -143,6 +147,10 @@ public abstract class PunishmentType implements Listener {
         return isInstant() ? null : new BasicCommand() {
             @Override
             public void execute(CommandSourceStack commandSourceStack, String[] args) {
+                if (!commandSourceStack.getSender().hasPermission("nexusbans."+getId())) {
+                    Utils.sendMessage(commandSourceStack.getSender(), "no-permission");
+                    return;
+                }
                 if (args.length < 1) {
                     Utils.sendMessage(commandSourceStack.getSender(), "un-usage");
                     return;

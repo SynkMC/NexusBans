@@ -27,6 +27,7 @@ messages:
   history-usage: "<red>Usage: /history <player/IP>"
   never: "Never"
   no-ip: "<red>%s1% has no known IP on the server!"
+  no-permission: "<red>You don't have permission to do this!"
 storage:
   use-database: false #If false, defaults to file storage
   database:
